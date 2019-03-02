@@ -1,0 +1,26 @@
+FROM ubuntu:18.04
+
+RUN apt-get update
+ENV TZ=America/Rochester
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 php libapache2-mod-php git openssl
+RUN useradd -ms /bin/bash alice
+RUN echo "alice:Password123!" | chpasswd
+RUN adduser alice sudo
+RUN git clone https://github.com/Nathan-CSEC731/Lab5.git ./webshell
+RUN mv ./webshell/* /var/www/html
+
+RUN sed -i "s/Options Indexes FollowSymLinks/Options FollowSymLinks/" /etc/apache2/apache2.conf
+RUN ln -s ../conf-available/security.conf /etc/apache2/conf-enabled/security.conf
+
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+RUN yopenssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+
+
+
+COPY ./startup.sh /usr/local/bin/startup.sh
+RUN chmod +x /usr/local/bin/startup.sh
+
+EXPOSE 80
+EXPOSE 22
+
+ENTRYPOINT ["/user/local/bin/startup.sh"]

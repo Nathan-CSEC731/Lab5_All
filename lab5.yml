@@ -1,0 +1,28 @@
+---
+- name: Lab Five
+  hosts: Linux
+  remote_user: root
+  tasks: 
+    - name: Update tasks
+      become: yes
+      shell: apt update
+
+    - name: Install Docker
+      become: yes
+      shell: apt install docker docker.io
+
+    - name: Build Ubuntu image
+      become: yes
+      shell: docker build -f ubuntu_docker/dockerfile .
+
+    - name: Run Ubuntu image
+      become: yes
+      shell: docker run -td -p 8080:80 -p 8443:443 ubuntu_docker/dockerfile
+
+    - name: Build ModSecurity image
+      become: yes
+      shell: docker build -t owasp/modsecurity-crs .
+
+    - name: RUN ModSecurity image
+      become: yes
+      shell: docker run -p 80:80 -e PROXY=1 -e UPSTREAM=localhost:8080 --rm owasp/modsecurity-crs 
