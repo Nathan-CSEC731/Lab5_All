@@ -10,11 +10,12 @@ RUN git clone https://github.com/Nathan-CSEC731/Lab5.git ./webshell
 RUN mv ./webshell/* /var/www/html
 
 RUN sed -i "s/Options Indexes FollowSymLinks/Options FollowSymLinks/" /etc/apache2/apache2.conf
-RUN ln -s ../conf-available/security.conf /etc/apache2/conf-enabled/security.conf
+RUN sed -i "s/ServerSignature Off/ServerTokens Prod/" /etc/apache2/apache2.conf
 
-RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
-RUN yopenssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
-
+COPY ./apache-selfsigned.key /etc/ssl/private/apache-selfsigned.ke
+COPY ./apache-selfsigned.crt /etc/ssl/certs/apache-selfsigned.crt
+COPY ./ssl-params.conf /etc/apache2/conf-available/ssl-params.conf
+COPY ./default-ssl.conf /etc/apache2/sites-available/default-ssl.conf
 
 
 COPY ./startup.sh /usr/local/bin/startup.sh
